@@ -23,13 +23,25 @@ namespace KID
         private Button btnFail;
         [SerializeField, Header("挑戰成功")]
         private Button btnSuccess;
+        [SerializeField, Header("失敗音效")]
+        private AudioClip soundFail;
+        [SerializeField, Header("成功音效")]
+        private AudioClip soundSuccess;
+        [SerializeField, Header("顯示獎券")]
+        private AudioClip soundShowTicket;
+        [SerializeField, Header("能量條音效")]
+        private AudioClip soundEnergy;
 
         private bool click;
         private bool check;
         private bool start;
 
+        private AudioSource aud;
+
         private void Awake()
         {
+            aud = GetComponent<AudioSource>();
+
             btnFail.onClick.AddListener(ClickFail);
         }
 
@@ -69,6 +81,12 @@ namespace KID
         {
             if (click) return;
 
+            if (!aud.isPlaying)
+            {
+                aud.clip = soundEnergy;
+                aud.Play();
+            }
+
             Vector2 posMove = new Vector2(Mathf.Sin(Time.time) * limit, -415);
             rectCrossHair.anchoredPosition = posMove;
 
@@ -88,16 +106,19 @@ namespace KID
             if (x > v2Success.x && x < v2Success.y)
             {
                 //print("成功");
+                aud.PlayOneShot(soundSuccess);
                 Invoke("DelaySuccess", 1);
                 StartCoroutine(StrawMoveDown());
             }
             else
             {
                 //print("失敗");
+                aud.PlayOneShot(soundFail);
                 Invoke("DelayFail", 0.5f);
             }
 
             check = true;
+            aud.clip = null;
         }
 
         /// <summary>
@@ -105,6 +126,7 @@ namespace KID
         /// </summary>
         private void DelaySuccess()
         {
+            aud.PlayOneShot(soundShowTicket);
             btnSuccess.gameObject.SetActive(true);
         }
 
